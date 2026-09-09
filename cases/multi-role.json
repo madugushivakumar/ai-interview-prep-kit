@@ -1,0 +1,20 @@
+[
+  {
+    "id": "case-multi-01",
+    "jd": "Senior Backend Engineer\n\nResponsibilities:\n- Design scalable backend microservices using Node.js and Go.\n- Optimize distributed MongoDB and PostgreSQL databases for high-throughput.\n- Implement secure authentication and rate-limited APIs.\n\nRequirements (Must Have):\n- 5+ years building backend systems in Node.js and TypeScript.\n- Deep proficiency with database modeling, indexing, and transactions.\n- Experience designing resilient RESTful and gRPC services.\n\nBonus:\n- Experience with Kafka, Redis caching, and Docker containerization.",
+    "company_url": "https://example.com",
+    "days": 5
+  },
+  {
+    "id": "case-multi-02",
+    "jd": "Staff Frontend Architect\n\nResponsibilities:\n- Lead the architecture of modern web applications using React and Next.js.\n- Ensure high web accessibility standards (WCAG) and sub-second load times.\n- Mentor frontend developers on state management and component design.\n\nRequirements (Must Have):\n- 6+ years in frontend engineering with React, Next.js, and TypeScript.\n- Strong expertise in browser performance profiling, hydration, and SSR.\n- Track record establishing frontend design systems and component libraries.\n\nBonus:\n- Experience with TailwindCSS, WebSockets, and end-to-end testing.",
+    "company_url": "https://example.com",
+    "days": 7
+  },
+  {
+    "id": "case-multi-03",
+    "jd": "Site Reliability Engineer (SRE)\n\nResponsibilities:\n- Manage multi-region Kubernetes clusters on AWS.\n- Automate CI/CD delivery pipelines and infrastructure provisioning using Terraform.\n- Establish SLOs, SLIs, and 24/7 alerting dashboards.\n\nRequirements (Must Have):\n- 4+ years in cloud infrastructure, Docker, and Kubernetes.\n- Proficiency in infrastructure-as-code with Terraform or Pulumi.\n- Hands-on experience with Prometheus, Grafana, and incident response.\n\nBonus:\n- Knowledge of Go or Python for automation tooling.",
+    "company_url": "https://example.com",
+    "days": 10
+  }
+]

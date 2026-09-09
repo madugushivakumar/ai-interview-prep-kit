@@ -1,0 +1,14 @@
+[
+  {
+    "id": "case-dup-01",
+    "jd": "Senior Python Developer\n\nMust have:\n- 4+ years with Python and Django.\n- PostgreSQL query optimization.\n\nBonus:\n- Celery and Redis background workers.",
+    "company_url": "https://example.com",
+    "days": 5
+  },
+  {
+    "id": "case-dup-02",
+    "jd": "Senior Python Developer\n\nMust have:\n- 4+ years with Python and Django.\n- PostgreSQL query optimization.\n\nBonus:\n- Celery and Redis background workers.",
+    "company_url": "https://example.com",
+    "days": 5
+  }
+]

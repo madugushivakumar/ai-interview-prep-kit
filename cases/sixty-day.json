@@ -1,0 +1,8 @@
+[
+  {
+    "id": "case-sixty-day-01",
+    "jd": "Principal Distributed Systems Architect\n\nMust have:\n- 10+ years architecting globally distributed databases.\n- Deep mastery of Consensus protocols (Raft, Paxos).\n- C++ or Rust high-performance systems engineering.\n\nNice to have:\n- Published papers in SIGMOD or VLDB.",
+    "company_url": "https://example.com",
+    "days": 60
+  }
+]

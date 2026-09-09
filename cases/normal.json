@@ -1,0 +1,8 @@
+[
+  {
+    "id": "case-normal-01",
+    "jd": "Senior Full-Stack Engineer\n\nAbout the Role:\nWe are seeking an experienced Full-Stack Engineer to architect and scale our cloud platform.\n\nKey Responsibilities:\n- Build real-time web applications using React, Next.js, and TypeScript.\n- Design scalable backend microservices and RESTful APIs using Node.js and Express.\n- Optimize MongoDB queries and data pipelines for high-throughput distributed systems.\n- Mentor junior and mid-level software engineers through code reviews and technical design sessions.\n\nRequirements (Must Have):\n- 5+ years of experience with React and TypeScript.\n- Strong hands-on proficiency with Node.js, Express, and REST APIs.\n- Production database experience with MongoDB and Redis.\n- Proven track record mentoring junior engineers and leading design reviews.\n\nNice to Have (Bonus):\n- Experience with Docker, Kubernetes, and AWS deployment.\n- Familiarity with CI/CD automation using GitHub Actions.\n- Background in financial technology or high-reliability systems.",
+    "company_url": "https://example.com",
+    "days": 5
+  }
+]

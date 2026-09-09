@@ -1,0 +1,8 @@
+[
+  {
+    "id": "case-one-day-01",
+    "jd": "Site Reliability Engineer (SRE)\n\nRequirements:\n- Must have: Linux kernel tuning, eBPF, Prometheus, and Kubernetes.\n- Nice to have: Go programming.",
+    "company_url": "https://example.com",
+    "days": 1
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "case-normal-01",
+    "jd": "Senior Full-Stack Engineer\n\nMust have:\n- 5+ years with React and TypeScript.\n- Node.js and Express backend development.\n\nNice to have:\n- AWS deployment.",
+    "company_url": "https://example.com",
+    "days": 5
+  },
+  {
+    "id": "case-unreachable-04",
+    "jd": "DevOps Engineer\n\nRequirements (Must have):\n- Terraform and AWS infrastructure.\n- Kubernetes cluster administration.",
+    "company_url": "http://this-company-domain-does-not-exist-xyz987456123.test/",
+    "days": 7
+  },
+  {
+    "id": "case-thin-02",
+    "jd": "Software Engineer wanted.\nMust have JavaScript experience.",
+    "company_url": "https://example.com",
+    "days": 3
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "name": "ai-interview-prep-kit-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI Interview Prep Kit - Full-Stack Application and Evaluation CLI",
+  "scripts": {
+    "evaluate": "node backend/node_modules/tsx/dist/cli.mjs backend/src/scripts/evaluate.ts",
+    "test": "npm run --prefix backend test",
+    "typecheck": "npm run --prefix backend typecheck && npm run --prefix frontend typecheck",
+    "build": "npm run --prefix backend build && npm run --prefix frontend build",
+    "dev:backend": "npm run --prefix backend dev",
+    "dev:frontend": "npm run --prefix frontend dev"
+  },
+  "keywords": [
+    "ai",
+    "interview-prep",
+    "crawler",
+    "full-stack",
+    "evaluation"
+  ],
+  "author": "Antigravity",
+  "license": "MIT"
+}

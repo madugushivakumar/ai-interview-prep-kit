@@ -1,9 +1,10 @@
 import { LLMService } from '../llm/llm.interface.js';
-import { Requirement, Question } from '../../types/kit.js';
+import { Requirement, Question, QuestionCategory } from '../../types/kit.js';
 import { buildSafePrompt } from '../llm/promptSanitizer.js';
 
 interface RawGapQuestion {
   requirement_ids: string[];
+  category?: string;
   prompt: string;
   answer_outline: string;
   difficulty: number;
@@ -41,6 +42,10 @@ STRICT RULES:
    - behavioural -> "behavioural"
    - domain -> "company-fit"
 4. 'difficulty' must be an integer: 1, 2, or 3.
+5. Provide a category-appropriate answer outline:
+   - Technical: Concept, Implementation, Trade-offs.
+   - Behavioural: STAR framework (Situation, Task, Action, Result).
+   - System Design: Requirements, Architecture, Data Model, Bottlenecks.
 
 Output JSON format:
 [
@@ -70,12 +75,20 @@ Output JSON format:
     );
   } catch {
     // Fallback gap generation
-    rawGaps = uncoveredRequirements.map(r => ({
-      requirement_ids: [r.id],
-      prompt: `Can you walk through a challenging scenario where you applied your expertise in ${r.text}?`,
-      answer_outline: 'Explain practical application, decision-making trade-offs, and lessons learned.',
-      difficulty: 2
-    }));
+    rawGaps = uncoveredRequirements.map(r => {
+      const isBeh = r.kind === 'behavioural';
+      return {
+        requirement_ids: [r.id],
+        category: isBeh ? 'behavioural' : 'technical',
+        prompt: isBeh
+          ? `Tell me about a time you applied ${r.text} in a challenging team environment.`
+          : `Explain how you would architect and validate an enterprise implementation of ${r.text}.`,
+        answer_outline: isBeh
+          ? `Situation: Team background regarding ${r.text}. Task: Leadership objective. Action: Specific steps taken. Result: Measurable outcome.`
+          : `Concept: Technical foundations of ${r.text}. Implementation: Code architecture. Trade-offs: Scalability vs complexity.`,
+        difficulty: 2
+      };
+    });
   }
 
   let nextId = startQuestionNumber;
@@ -90,22 +103,30 @@ Output JSON format:
       rids = [uncoveredRequirements[0].id];
     }
 
-    const category = (item as any).category || (
-      uncoveredRequirements.find(r => r.id === rids[0])?.kind === 'behavioural' 
-        ? 'behavioural' 
-        : 'technical'
-    );
+    const matchedReq = uncoveredRequirements.find(r => r.id === rids[0]);
+    let category: QuestionCategory = 'technical';
+    if (item.category && ['technical', 'behavioural', 'system-design', 'company-fit'].includes(item.category)) {
+      category = item.category as QuestionCategory;
+    } else if (matchedReq?.kind === 'behavioural') {
+      category = 'behavioural';
+    } else if (matchedReq?.kind === 'domain') {
+      category = 'company-fit';
+    }
 
     const difficulty = (item.difficulty === 1 || item.difficulty === 2 || item.difficulty === 3) 
       ? item.difficulty 
       : 2;
+
+    const defaultOutline = category === 'behavioural'
+      ? 'Situation: Context. Task: Challenge. Action: Solution implemented. Result: Impact and reflection.'
+      : 'Concept: Core principle. Implementation: Architectural design. Trade-offs: Operational considerations.';
 
     return {
       id: `q${nextId++}`,
       requirement_ids: rids,
       category,
       prompt: item.prompt?.trim() || `Deep-dive interview question on ${rids.join(', ')}`,
-      answer_outline: item.answer_outline?.trim() || 'Comprehensive evaluation outline.',
+      answer_outline: item.answer_outline?.trim() || defaultOutline,
       difficulty,
       metadata: {
         source: 'generated',

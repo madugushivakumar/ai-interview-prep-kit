@@ -75,8 +75,14 @@ export function FlashcardPractice({ queue, onRecordConfidence, onFinishSession }
       </div>
 
       {/* Main Flashcard Component */}
-      <div className="bg-slate-900/70 border border-slate-800 rounded-3xl p-8 min-h-[320px] flex flex-col justify-between shadow-2xl backdrop-blur relative overflow-hidden">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800/80">
+      <div className="bg-slate-900/65 border border-indigo-500/25 rounded-3xl p-8 min-h-[320px] flex flex-col justify-between shadow-[0_0_40px_rgba(79,70,229,0.15)] backdrop-blur-xl relative overflow-hidden">
+        {/* Ambient Corner Glow */}
+        <div
+          className="absolute -top-16 -right-16 w-40 h-40 bg-purple-500/15 rounded-full blur-3xl pointer-events-none"
+          aria-hidden="true"
+        />
+
+        <div className="flex items-center justify-between pb-4 border-b border-slate-800/80 relative z-10">
           <span className="font-mono text-xs font-bold text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
             {currentCard.id}
           </span>
@@ -90,7 +96,7 @@ export function FlashcardPractice({ queue, onRecordConfidence, onFinishSession }
         </div>
 
         {/* Card Body */}
-        <div className="py-6 flex-1 flex flex-col justify-center">
+        <div className="py-6 flex-1 flex flex-col justify-center relative z-10">
           <span className="text-xs font-bold uppercase tracking-wider text-indigo-400/90 mb-2">
             Front — Concept & Scenario
           </span>
@@ -104,7 +110,7 @@ export function FlashcardPractice({ queue, onRecordConfidence, onFinishSession }
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-400/90 mb-2 block">
                 Back — Core Principle & Answer
               </span>
-              <p className="text-sm text-slate-200 leading-relaxed font-medium bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+              <p className="text-sm text-slate-200 leading-relaxed font-medium bg-slate-950/70 p-4 rounded-2xl border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
                 {currentCard.back}
               </p>
             </div>
@@ -112,13 +118,13 @@ export function FlashcardPractice({ queue, onRecordConfidence, onFinishSession }
         </div>
 
         {/* Action Bar */}
-        <div className="pt-4 border-t border-slate-800/80">
+        <div className="pt-4 border-t border-slate-800/80 relative z-10">
           {!isRevealed ? (
             <button
               onClick={() => setIsRevealed(true)}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-2xl shadow-lg shadow-indigo-600/20 transition-all"
+              className="w-full flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 hover:from-indigo-500 hover:via-purple-500 hover:to-cyan-500 text-white font-semibold text-sm rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.35)] transition-all hover:scale-[1.01] active:scale-[0.99]"
             >
-              <Eye className="w-4 h-4" />
+              <Eye className="w-4 h-4 text-cyan-300" />
               <span>Reveal Answer</span>
             </button>
           ) : (

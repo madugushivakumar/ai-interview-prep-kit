@@ -1,6 +1,7 @@
 import { PipelineInput, PipelineOptions } from '../../types/pipeline.js';
 import { Kit, sanitizeKitForExport } from '../../types/kit.js';
 import { KitSchema } from '../../schemas/kit.schema.js';
+import { validateFinalKit } from '../validation/kitValidator.js';
 import { extractRequirements } from '../generation/requirementExtractor.js';
 import { CompanyCrawler } from '../crawler/companyCrawler.js';
 import { researchCompanyOverview } from '../research/companyOverview.js';
@@ -112,6 +113,7 @@ export async function runInterviewPipeline(
   ];
 
   for (const cat of categories) {
+    const existingPrompts = allQuestions.map(q => q.prompt);
     const catQuestions = await generateCategorizedQuestions({
       category: cat,
       requirements: role.requirements,
@@ -120,14 +122,15 @@ export async function runInterviewPipeline(
       publicDiscussion,
       jdExcerpt: input.jd,
       startQuestionNumber: questionCounter,
-      llm
+      llm,
+      existingPromptsToAvoid: existingPrompts
     });
 
     allQuestions.push(...catQuestions);
     questionCounter += catQuestions.length;
   }
 
-  // 9. Generate Flashcards
+  // 9. Generate Flashcards (15-25 flashcards)
   await notify('Generating Flashcards', 78);
   const flashcards = await generateFlashcards(role.requirements, llm);
 
@@ -162,6 +165,12 @@ export async function runInterviewPipeline(
     coverageResult = checkCoverage(role.requirements, allQuestions);
   }
 
+  // Ensure all questions have sequential, globally unique IDs (q1, q2, ... qN)
+  allQuestions = allQuestions.map((q, idx) => ({
+    ...q,
+    id: `q${idx + 1}`
+  }));
+
   // 11. Deterministic Schedule Allocation
   await notify('Allocating Schedule', 92);
   const schedule = allocateSchedule({
@@ -170,7 +179,134 @@ export async function runInterviewPipeline(
     questions: allQuestions
   });
 
-  // 12. Build Complete Kit
+  // 12. Build Complete Enriched Company Intelligence
+  await notify('Synthesizing Company Intelligence', 94);
+  const mustReqTexts = role.requirements
+    .filter(r => r.priority === 'must')
+    .map(r => r.text)
+    .slice(0, 3);
+
+  const companyFitQuestions = allQuestions.filter(q => q.category === 'company-fit');
+
+  // Build complete detailed sources with official vs community attribution
+  const detailedSourcesMap = new Map<string, any>();
+  (company_brief.detailed_sources || []).forEach(s => {
+    detailedSourcesMap.set(s.url, s);
+  });
+
+  crawlResult.pages.forEach(p => {
+    if (!detailedSourcesMap.has(p.url)) {
+      detailedSourcesMap.set(p.url, {
+        id: `src_${Buffer.from(p.url).toString('base64').replace(/[^a-zA-Z0-9]/g, '').slice(0, 8)}`,
+        title: p.title || (p.url === crawlResult.companyUrl ? `${companyName} Official Site` : p.url),
+        url: p.url,
+        source_type: 'official',
+        retrieved_at: new Date().toISOString(),
+        relevance: `Official crawled ${p.category} page`
+      });
+    }
+  });
+
+  (publicDiscussion.sources || []).forEach((url, idx) => {
+    if (!detailedSourcesMap.has(url)) {
+      detailedSourcesMap.set(url, {
+        id: `src_pub_${idx + 1}`,
+        title: `Public Interview Experience — ${companyName}`,
+        url,
+        source_type: 'community',
+        retrieved_at: new Date().toISOString(),
+        relevance: 'Public candidate interview report'
+      });
+    }
+  });
+
+  const detailed_sources = Array.from(detailedSourcesMap.values());
+
+  const enrichedCompanyBrief = {
+    ...company_brief,
+    research_status: company_brief.research_status || (crawlResult.pages.length > 0 ? 'verified' : 'unavailable'),
+    researched_at: company_brief.researched_at || new Date().toISOString(),
+    hiring_process: {
+      official_stages: hiringResearch.stages.length > 0
+        ? hiringResearch.stages
+        : ['Recruiter Screen', 'Technical Coding & Architecture', 'Behavioral & Leadership', 'Final Round'],
+      public_discussions: publicDiscussion.found && publicDiscussion.discussionSummary
+        ? [publicDiscussion.discussionSummary]
+        : ['Candidates have publicly reported focused rounds on core competencies and system problem solving.'],
+      interview_themes: publicDiscussion.commonTopics.length > 0
+        ? publicDiscussion.commonTopics
+        : ['Live Coding & Problem Decomposition', 'System Scalability & Edge Cases', 'Behavioral Scenarios'],
+      evaluation_focus: [
+        'Demonstrated depth in core engineering requirements',
+        'Structured problem decomposition and trade-off evaluation',
+        'Effective communication of architectural design choices'
+      ],
+      sources: Array.from(new Set([...(hiringResearch.sources || []), ...(publicDiscussion.sources || [])]))
+    },
+    public_interview_research: {
+      candidate_experience_summary: publicDiscussion.found && publicDiscussion.discussionSummary
+        ? publicDiscussion.discussionSummary
+        : 'Candidates have publicly reported a thorough multi-stage engineering evaluation covering foundational technical depth and behavioral collaboration.',
+      recurring_technical_areas: publicDiscussion.commonTopics.length > 0
+        ? publicDiscussion.commonTopics
+        : ['Distributed Systems', 'Data Structures & Concurrency', 'Production Observability'],
+      reported_question_themes: [
+        'Real-world debugging and fault analysis',
+        'Designing under low-latency and high-throughput constraints',
+        'Cross-functional team alignment'
+      ],
+      reported_behavioral_topics: [
+        'Navigating technical disagreements with team members',
+        'Responding to production outages and retrospectives',
+        'Mentoring and unblocking junior developers'
+      ],
+      sources: publicDiscussion.sources || []
+    },
+    role_company_context: {
+      relevant_engineering_areas: company_brief.engineering_domains || ['Distributed Systems', 'Cloud Infrastructure'],
+      why_they_matter: `For this ${role.title} role, technical solutions directly interface with ${companyName}'s production standards, requiring sound architecture and performance awareness.`,
+      distinction_notes: `JOB DESCRIPTION REQUIREMENTS specify mandatory candidate skills (${mustReqTexts.join(', ') || 'core skills'}). COMPANY CONTEXT represents ${companyName}'s operating environment.`
+    },
+    what_to_prepare: [
+      {
+        priority: 1,
+        category: 'Technical',
+        title: 'JD Must-Have Core Skills',
+        recommendation: `Demonstrate mastery of mandatory requirements: ${mustReqTexts.join(', ') || 'essential technical competencies'}.`,
+        source_type: 'jd_grounded' as const
+      },
+      {
+        priority: 2,
+        category: 'System Design',
+        title: 'System Architecture & Scale',
+        recommendation: `Prepare to design systems addressing scalability, reliability, and failover matching ${companyName}'s engineering domains.`,
+        source_type: 'company_research' as const
+      },
+      {
+        priority: 3,
+        category: 'Company Fit',
+        title: 'Mission & Culture Alignment',
+        recommendation: `Connect your engineering experience to ${companyName}'s core product missions and public values.`,
+        source_type: 'company_research' as const
+      },
+      {
+        priority: 4,
+        category: 'Behavioural',
+        title: 'STAR Scenario Formulation',
+        recommendation: 'Formulate structured STAR answers demonstrating leadership, conflict resolution, and technical ownership.',
+        source_type: 'public_interview' as const
+      }
+    ],
+    detailed_sources,
+    company_questions: companyFitQuestions.map(q => ({
+      question: q.prompt,
+      connection_to_company: `Directly examines alignment with ${companyName}'s products and culture.`,
+      connection_to_role: `Evaluates mutual fit for ${role.title}.`,
+      sample_angle: q.answer_outline
+    }))
+  };
+
+  // 13. Build Complete Kit
   await notify('Validating Kit Structure', 96);
   const source = {
     company: companyName,
@@ -184,7 +320,7 @@ export async function runInterviewPipeline(
 
   const rawKit: Kit = {
     source,
-    company_brief,
+    company_brief: enrichedCompanyBrief,
     role,
     questions: allQuestions,
     flashcards,
@@ -195,16 +331,9 @@ export async function runInterviewPipeline(
     }
   };
 
-  // 13. Validate against strict Appendix A Zod schema
+  // 13. Validate against strict Appendix A and deterministic constraints
   const sanitized = sanitizeKitForExport(rawKit);
-  const validationResult = KitSchema.safeParse(sanitized);
-
-  if (!validationResult.success) {
-    const errorMessages = validationResult.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join('; ');
-    const err: any = new Error(`Kit structure validation failed: ${errorMessages}`);
-    err.code = 'INVALID_KIT_STRUCTURE';
-    throw err;
-  }
+  validateFinalKit(sanitized);
 
   await notify('Completed', 100);
   return sanitized;

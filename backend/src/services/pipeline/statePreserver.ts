@@ -1,10 +1,11 @@
 import { Kit, Question, QuestionCategory } from '../../types/kit.js';
-import { generateCategorizedQuestions } from '../generation/questionGenerator.js';
+import { generateCategorizedQuestions, DEFAULT_QUESTION_TARGETS } from '../generation/questionGenerator.js';
 import { checkCoverage } from '../coverage/coverageChecker.js';
 import { allocateSchedule } from '../scheduling/scheduleAllocator.js';
 import { LLMService } from '../llm/llm.interface.js';
 import { researchCompanyOverview } from '../research/companyOverview.js';
 import { CompanyCrawler } from '../crawler/companyCrawler.js';
+import { validateFinalKit } from '../validation/kitValidator.js';
 
 /**
  * State Preservation & Targeted Section Regeneration Engine
@@ -46,37 +47,70 @@ export class StatePreserver {
           // PROTECTED: User touched this question
           protectedQuestions.push(q);
         } else {
-          // ELIGIBLE: Untouched generated question
+          // ELIGIBLE: Untouched generated question to be replaced
           eligibleToRemoveIds.add(q.id);
         }
       }
     }
 
-    // 2. Generate replacement questions for this category
-    const startQNum = existingQuestions.length + 10;
-    const newQuestions = await generateCategorizedQuestions({
+    // 2. Determine target count and avoid existing question prompts
+    const protectedInThisCat = protectedQuestions.filter(q => q.category === category).length;
+    const targetCountForCat = DEFAULT_QUESTION_TARGETS[category] || 8;
+    const neededCount = Math.max(targetCountForCat - protectedInThisCat, 2);
+
+    const existingPromptsToAvoid = existingQuestions.map(q => q.prompt);
+
+    // 3. Compute starting question ID to avoid any collision with preserved questions
+    const usedIds = new Set<string>(protectedQuestions.map(q => q.id));
+    let maxExistingNum = 0;
+    for (const q of existingQuestions) {
+      const num = parseInt(q.id.replace(/\D/g, ''), 10);
+      if (!isNaN(num) && num > maxExistingNum) {
+        maxExistingNum = num;
+      }
+    }
+    const startQNum = maxExistingNum + 1;
+
+    // 4. Generate fresh replacement questions for this category
+    const generatedQuestions = await generateCategorizedQuestions({
       category,
       requirements: kit.role.requirements,
       companyBrief: kit.company_brief,
       jdExcerpt: '',
       startQuestionNumber: startQNum,
-      llm
+      llm,
+      targetCount: neededCount,
+      existingPromptsToAvoid
     });
 
-    // 3. Merge Protected + Newly Generated
-    const updatedQuestions = [...protectedQuestions, ...newQuestions];
+    // 5. Ensure newly generated questions have strictly unique non-colliding IDs
+    let currentSeq = startQNum;
+    const newQuestionsWithSafeIds = generatedQuestions.map(q => {
+      while (usedIds.has(`q${currentSeq}`)) {
+        currentSeq++;
+      }
+      const safeId = `q${currentSeq++}`;
+      usedIds.add(safeId);
+      return {
+        ...q,
+        id: safeId
+      };
+    });
 
-    // 4. Re-calculate deterministic coverage
+    // 6. Merge Protected + Newly Generated
+    const updatedQuestions = [...protectedQuestions, ...newQuestionsWithSafeIds];
+
+    // 7. Re-calculate deterministic coverage
     const coverageAnalysis = checkCoverage(kit.role.requirements, updatedQuestions);
 
-    // 5. Re-allocate schedule deterministically with the updated questions
+    // 8. Re-allocate schedule deterministically with the updated questions
     const updatedSchedule = allocateSchedule({
       days: kit.schedule.days_available,
       requirements: kit.role.requirements,
       questions: updatedQuestions
     });
 
-    return {
+    return validateFinalKit({
       ...kit,
       questions: updatedQuestions,
       schedule: updatedSchedule,
@@ -84,7 +118,7 @@ export class StatePreserver {
         uncovered_requirement_ids: coverageAnalysis.uncovered_requirement_ids,
         passes: kit.coverage.passes
       }
-    };
+    });
   }
 
   /**
@@ -102,15 +136,31 @@ export class StatePreserver {
     const crawlResult = await crawler.crawl(kit.source.company_url);
     const newBrief = await researchCompanyOverview(kit.source.company_url, crawlResult.pages, llm);
 
-    return {
+    // Re-link existing company fit questions to refreshed company brief
+    const companyFitQuestions = (kit.questions || []).filter(q => q.category === 'company-fit');
+    const companyName = kit.source.company || 'Company';
+
+    const mergedBrief = {
+      ...kit.company_brief,
+      ...newBrief,
+      researched_at: new Date().toISOString(),
+      company_questions: companyFitQuestions.map(q => ({
+        question: q.prompt,
+        connection_to_company: `Directly examines alignment with ${companyName}'s products and culture.`,
+        connection_to_role: `Evaluates mutual fit for ${kit.role?.title || 'this role'}.`,
+        sample_angle: q.answer_outline
+      }))
+    };
+
+    return validateFinalKit({
       ...kit,
-      company_brief: newBrief,
+      company_brief: mergedBrief,
       source: {
         ...kit.source,
         researched_at: new Date().toISOString(),
         pages_used: Array.from(new Set([...kit.source.pages_used, ...crawlResult.pagesUsed]))
       }
-    };
+    });
   }
 
   /**
@@ -125,9 +175,9 @@ export class StatePreserver {
       questions: kit.questions
     });
 
-    return {
+    return validateFinalKit({
       ...kit,
       schedule: newSchedule
-    };
+    });
   }
 }

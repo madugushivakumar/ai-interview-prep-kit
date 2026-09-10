@@ -8,8 +8,9 @@ export const RequirementSchema = z.object({
   id: z.string().min(1),
   text: z.string().min(1),
   kind: RequirementKindSchema,
-  priority: RequirementPrioritySchema
-});
+  priority: RequirementPrioritySchema,
+  metadata: z.record(z.any()).optional()
+}).passthrough();
 
 export const SourceInfoSchema = z.object({
   company: z.string(),
@@ -21,17 +22,113 @@ export const SourceInfoSchema = z.object({
   pages_used: z.array(z.string())
 });
 
+export const DetailedSourceSchema = z.object({
+  id: z.string().optional(),
+  title: z.string(),
+  url: z.string(),
+  source_type: z.enum(['official', 'community', 'public', 'unknown']).default('unknown'),
+  retrieved_at: z.string().optional(),
+  relevance: z.string().optional()
+});
+
+export const CompanyProductServiceSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  source: z.string().optional()
+});
+
+export const CompanyValueSchema = z.object({
+  value: z.string(),
+  description: z.string(),
+  source: z.string().optional()
+});
+
+export const PreparationInsightSchema = z.object({
+  priority: z.number(),
+  category: z.string(),
+  title: z.string(),
+  recommendation: z.string(),
+  source_type: z.enum(['jd_grounded', 'company_research', 'public_interview'])
+});
+
 export const CompanyBriefSchema = z.object({
   summary: z.string(),
   what_they_do: z.string(),
-  sources: z.array(z.string())
-});
+  sources: z.array(z.string()),
+  research_status: z.enum(['verified', 'partially_researched', 'unavailable']).optional(),
+  researched_at: z.string().optional(),
+  industry: z.string().optional(),
+  primary_domains: z.array(z.string()).optional(),
+  engineering_domains: z.array(z.string()).optional(),
+  business_model: z.string().optional(),
+  company_scale: z.string().optional(),
+  products_services: z.array(CompanyProductServiceSchema).optional(),
+  mission: z.string().optional(),
+  values: z.array(CompanyValueSchema).optional(),
+  engineering_context: z.object({
+    themes: z.array(z.string()).optional(),
+    challenges: z.array(z.string()).optional(),
+    tech_areas: z.array(z.string()).optional(),
+    blog_urls: z.array(z.string()).optional(),
+    source: z.string().optional()
+  }).optional(),
+  role_company_context: z.object({
+    relevant_engineering_areas: z.array(z.string()).optional(),
+    why_they_matter: z.string().optional(),
+    distinction_notes: z.string().optional()
+  }).optional(),
+  engineering_challenges: z.array(z.object({
+    challenge: z.string(),
+    details: z.string(),
+    source: z.string().optional()
+  })).optional(),
+  hiring_process: z.object({
+    official_stages: z.array(z.string()).optional(),
+    public_discussions: z.array(z.string()).optional(),
+    interview_themes: z.array(z.string()).optional(),
+    evaluation_focus: z.array(z.string()).optional(),
+    sources: z.array(z.string()).optional()
+  }).optional(),
+  public_interview_research: z.object({
+    candidate_experience_summary: z.string().optional(),
+    recurring_technical_areas: z.array(z.string()).optional(),
+    reported_question_themes: z.array(z.string()).optional(),
+    reported_behavioral_topics: z.array(z.string()).optional(),
+    sources: z.array(z.string()).optional()
+  }).optional(),
+  what_to_prepare: z.array(PreparationInsightSchema).optional(),
+  detailed_sources: z.array(DetailedSourceSchema).optional(),
+  company_questions: z.array(z.object({
+    question: z.string(),
+    connection_to_company: z.string(),
+    connection_to_role: z.string(),
+    sample_angle: z.string().optional()
+  })).optional()
+}).passthrough();
 
 export const RoleBreakdownSchema = z.object({
   title: z.string(),
   seniority: z.string(),
   responsibilities: z.array(z.string()),
-  requirements: z.array(RequirementSchema)
+  requirements: z.array(RequirementSchema),
+  overview: z.string().optional(),
+  normalized_title: z.string().optional(),
+  employment_type: z.string().optional(),
+  work_mode: z.string().optional(),
+  location: z.string().optional(),
+  department: z.string().optional(),
+  job_family: z.string().optional(),
+  experience: z.string().optional(),
+  education: z.array(z.string()).optional(),
+  certifications: z.array(z.string()).optional(),
+  technical_skills: z.record(z.array(z.string())).optional(),
+  soft_skills: z.array(z.string()).optional(),
+  domain_skills: z.array(z.string()).optional(),
+  responsibility_skill_map: z.record(z.array(z.string())).optional(),
+  requirement_skill_map: z.record(z.array(z.string())).optional(),
+  compensation: z.string().optional(),
+  benefits: z.array(z.string()).optional(),
+  work_authorization: z.string().optional()
 });
 
 export const QuestionSchema = z.object({
@@ -40,15 +137,17 @@ export const QuestionSchema = z.object({
   category: QuestionCategorySchema,
   prompt: z.string().min(1),
   answer_outline: z.string().min(1),
-  difficulty: z.union([z.literal(1), z.literal(2), z.literal(3)])
-});
+  difficulty: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  metadata: z.record(z.any()).optional()
+}).passthrough();
 
 export const FlashcardSchema = z.object({
   id: z.string().min(1),
   front: z.string().min(1),
   back: z.string().min(1),
-  requirement_ids: z.array(z.string())
-});
+  requirement_ids: z.array(z.string()),
+  metadata: z.record(z.any()).optional()
+}).passthrough();
 
 export const ScheduleDaySchema = z.object({
   day: z.number().int().positive(),
@@ -146,3 +245,5 @@ export const KitSchema = z.object({
 });
 
 export type KitSchemaType = z.infer<typeof KitSchema>;
+
+export { validateFinalKit, KitValidationError } from '../services/validation/kitValidator.js';

@@ -5,6 +5,8 @@ import { WeakSpotsReport } from '../../types';
 import { Badge } from '../ui/Badge';
 import { Target, AlertCircle, Award, BookOpen, CheckCircle, TrendingUp } from 'lucide-react';
 
+import { StatCard } from '../ui/StatCard';
+
 interface WeakSpotsReportViewProps {
   report: WeakSpotsReport;
 }
@@ -14,52 +16,29 @@ export function WeakSpotsReportView({ report }: WeakSpotsReportViewProps) {
     <div className="space-y-8">
       {/* Metric Summary Banner */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 backdrop-blur">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Proficiency Score
-            </span>
-            <TrendingUp className="w-4 h-4 text-indigo-400" />
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-slate-100">
-              {report.overallProficiencyScore}%
-            </span>
-            <span className="text-xs text-slate-500">of mastery</span>
-          </div>
-        </div>
+        <StatCard
+          label="Proficiency Score"
+          value={`${report.overallProficiencyScore}%`}
+          subtext="Overall interview readiness"
+          icon={TrendingUp}
+          accent="purple"
+        />
 
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 backdrop-blur">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Flashcard Coverage
-            </span>
-            <BookOpen className="w-4 h-4 text-emerald-400" />
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-slate-100">
-              {report.completionRate}%
-            </span>
-            <span className="text-xs text-slate-500">
-              ({report.totalCardsPracticed} reviews)
-            </span>
-          </div>
-        </div>
+        <StatCard
+          label="Flashcard Coverage"
+          value={`${report.completionRate}%`}
+          subtext={`${report.totalCardsPracticed} total reviews`}
+          icon={BookOpen}
+          accent="emerald"
+        />
 
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 backdrop-blur">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Critical Weak Spots
-            </span>
-            <AlertCircle className="w-4 h-4 text-rose-400" />
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-rose-400">
-              {report.weakSpots.length}
-            </span>
-            <span className="text-xs text-slate-500">topics need review</span>
-          </div>
-        </div>
+        <StatCard
+          label="Critical Weak Spots"
+          value={report.weakSpots.length}
+          subtext="Topics requiring immediate drill"
+          icon={AlertCircle}
+          accent="pink"
+        />
       </div>
 
       {/* Summary Advice */}
@@ -83,7 +62,7 @@ export function WeakSpotsReportView({ report }: WeakSpotsReportViewProps) {
             {report.weakSpots.map((item, idx) => (
               <div
                 key={idx}
-                className="bg-slate-900/60 border border-rose-500/20 rounded-2xl p-5 backdrop-blur space-y-4"
+                className="bg-slate-900/65 border border-rose-500/30 rounded-2xl p-5 backdrop-blur-xl shadow-[0_0_20px_rgba(244,63,94,0.08)] space-y-4"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">

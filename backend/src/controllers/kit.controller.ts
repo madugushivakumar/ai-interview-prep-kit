@@ -4,8 +4,10 @@ import { KitModel, IKitDocument } from '../models/Kit.js';
 import { runInterviewPipeline } from '../services/pipeline/interviewPipeline.js';
 import { StatePreserver } from '../services/pipeline/statePreserver.js';
 import { LLMFactory } from '../services/llm/llm.factory.js';
-import { Question, Flashcard } from '../types/kit.js';
+import { Question, Flashcard, QuestionCategory } from '../types/kit.js';
 import { checkCoverage } from '../services/coverage/coverageChecker.js';
+import { allocateSchedule } from '../services/scheduling/scheduleAllocator.js';
+import { validateFinalKit } from '../services/validation/kitValidator.js';
 import { MultiRoleParser } from '../services/batch/multiRoleParser.js';
 
 export class KitController {
@@ -40,7 +42,7 @@ export class KitController {
       const userId = req.user!._id;
       const kits = await KitModel.find({ userId })
         .sort({ createdAt: -1 })
-        .select('status input kit.source kit.role.title kit.coverage createdAt updatedAt generationState');
+        .select('status input kit.source kit.role.title kit.coverage createdAt updatedAt generationState practiceState');
 
       res.status(200).json({
         success: true,
@@ -422,10 +424,14 @@ export class KitController {
   public static async updateCompany(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const kitDoc = await KitController.findUserKit(req.params.id, req.user!._id.toString());
-      const { summary, what_they_do } = req.body;
+      const { summary, what_they_do, industry, mission, values, products_services } = req.body;
 
-      kitDoc.kit.company_brief.summary = summary;
-      kitDoc.kit.company_brief.what_they_do = what_they_do;
+      if (summary !== undefined) kitDoc.kit.company_brief.summary = summary;
+      if (what_they_do !== undefined) kitDoc.kit.company_brief.what_they_do = what_they_do;
+      if (industry !== undefined) kitDoc.kit.company_brief.industry = industry;
+      if (mission !== undefined) kitDoc.kit.company_brief.mission = mission;
+      if (values !== undefined) kitDoc.kit.company_brief.values = values;
+      if (products_services !== undefined) kitDoc.kit.company_brief.products_services = products_services;
 
       kitDoc.markModified('kit.company_brief');
       await kitDoc.save();
@@ -440,23 +446,76 @@ export class KitController {
   }
 
   /**
+   * Get Company Brief and Sources
+   */
+  public static async getCompanyBrief(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const kitDoc = await KitController.findUserKit(req.params.id, req.user!._id.toString());
+      res.status(200).json({
+        success: true,
+        data: {
+          company: kitDoc.kit?.source?.company || 'Company',
+          company_url: kitDoc.kit?.source?.company_url,
+          company_brief: kitDoc.kit?.company_brief
+        }
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /**
    * Inline Edit: Role
    */
   public static async updateRole(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const kitDoc = await KitController.findUserKit(req.params.id, req.user!._id.toString());
-      const { title, seniority, responsibilities } = req.body;
+      const { title, seniority, responsibilities, requirements } = req.body;
 
       kitDoc.kit.role.title = title;
       kitDoc.kit.role.seniority = seniority;
       kitDoc.kit.role.responsibilities = responsibilities;
+
+      if (requirements && Array.isArray(requirements)) {
+        kitDoc.kit.role.requirements = requirements;
+
+        // Clean any dangling requirement references from questions & flashcards
+        const validReqIds = new Set(requirements.map(r => r.id));
+        kitDoc.kit.questions.forEach(q => {
+          q.requirement_ids = q.requirement_ids.filter(id => validReqIds.has(id));
+        });
+        kitDoc.kit.flashcards.forEach(f => {
+          f.requirement_ids = f.requirement_ids.filter(id => validReqIds.has(id));
+        });
+
+        // Recalculate deterministic coverage
+        const cov = checkCoverage(kitDoc.kit.role.requirements, kitDoc.kit.questions);
+        kitDoc.kit.coverage = {
+          uncovered_requirement_ids: cov.uncovered_requirement_ids,
+          passes: kitDoc.kit.coverage?.passes || 1
+        };
+
+        // Recalculate deterministic schedule
+        kitDoc.kit.schedule = allocateSchedule({
+          days: kitDoc.kit.schedule.days_available,
+          requirements: kitDoc.kit.role.requirements,
+          questions: kitDoc.kit.questions
+        });
+
+        kitDoc.markModified('kit.questions');
+        kitDoc.markModified('kit.flashcards');
+        kitDoc.markModified('kit.coverage');
+        kitDoc.markModified('kit.schedule');
+      }
+
+      validateFinalKit(kitDoc.kit);
 
       kitDoc.markModified('kit.role');
       await kitDoc.save();
 
       res.status(200).json({
         success: true,
-        data: { role: kitDoc.kit.role }
+        data: { role: kitDoc.kit.role, kit: kitDoc.kit }
       });
     } catch (err) {
       next(err);
@@ -548,11 +607,12 @@ export class KitController {
     try {
       const kitDoc = await KitController.findUserKit(req.params.id, req.user!._id.toString());
       const { questionId } = req.params;
+      const qId = Array.isArray(questionId) ? questionId[0] : questionId;
 
-      kitDoc.kit.questions = kitDoc.kit.questions.filter(q => q.id !== questionId);
+      kitDoc.kit.questions = kitDoc.kit.questions.filter(q => q.id !== qId);
       // Also remove from schedule
       kitDoc.kit.schedule.days.forEach(d => {
-        d.question_ids = d.question_ids.filter(id => id !== questionId);
+        d.question_ids = d.question_ids.filter(id => id !== qId);
       });
 
       // Recalculate deterministic coverage
@@ -564,6 +624,14 @@ export class KitController {
         };
         kitDoc.markModified('kit.coverage');
       }
+
+      // Clean up practice state so no dangling question references exist
+      if (kitDoc.practiceState?.itemProgress?.[qId]) {
+        delete kitDoc.practiceState.itemProgress[qId];
+        kitDoc.markModified('practiceState');
+      }
+
+      validateFinalKit(kitDoc.kit);
 
       kitDoc.markModified('kit.questions');
       kitDoc.markModified('kit.schedule');
@@ -654,11 +722,34 @@ export class KitController {
     try {
       const kitDoc = await KitController.findUserKit(req.params.id, req.user!._id.toString());
       const { category } = req.params;
+
+      let normalizedCategory: QuestionCategory;
+      const rawCat = Array.isArray(category) ? category[0] : category;
+      const catLower = (typeof rawCat === 'string' ? rawCat : '').toLowerCase().trim();
+      if (catLower === 'technical') {
+        normalizedCategory = 'technical';
+      } else if (catLower === 'behavioural' || catLower === 'behavioral') {
+        normalizedCategory = 'behavioural';
+      } else if (catLower === 'system-design' || catLower === 'system' || catLower === 'systemdesign') {
+        normalizedCategory = 'system-design';
+      } else if (catLower === 'company-fit' || catLower === 'company' || catLower === 'companyfit') {
+        normalizedCategory = 'company-fit';
+      } else {
+        res.status(400).json({
+          success: false,
+          error: {
+            code: 'INVALID_CATEGORY',
+            message: `Invalid question category: "${category}". Expected: "technical", "behavioural", "system-design", or "company-fit".`
+          }
+        });
+        return;
+      }
+
       const llm = LLMFactory.getProvider();
 
       const updatedKit = await StatePreserver.regenerateCategory({
         kit: kitDoc.kit,
-        category: category as any,
+        category: normalizedCategory,
         llm
       });
 
@@ -799,13 +890,21 @@ export class KitController {
     try {
       const kitDoc = await KitController.findUserKit(req.params.id, req.user!._id.toString());
       const { flashcardId } = req.params;
+      const fId = Array.isArray(flashcardId) ? flashcardId[0] : flashcardId;
 
-      kitDoc.kit.flashcards = kitDoc.kit.flashcards.filter(f => f.id !== flashcardId);
+      kitDoc.kit.flashcards = kitDoc.kit.flashcards.filter(f => f.id !== fId);
       // Clean up practice state so no dangling flashcard IDs exist
       if (kitDoc.practiceState?.cards) {
-        kitDoc.practiceState.cards = kitDoc.practiceState.cards.filter(c => c.flashcardId !== flashcardId);
+        kitDoc.practiceState.cards = kitDoc.practiceState.cards.filter(c => c.flashcardId !== fId);
         kitDoc.markModified('practiceState');
       }
+      if (kitDoc.practiceState?.itemProgress?.[fId]) {
+        delete kitDoc.practiceState.itemProgress[fId];
+        kitDoc.markModified('practiceState');
+      }
+
+      validateFinalKit(kitDoc.kit);
+
       kitDoc.markModified('kit.flashcards');
       await kitDoc.save();
 

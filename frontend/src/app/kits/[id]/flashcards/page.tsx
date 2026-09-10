@@ -50,10 +50,10 @@ export default function FlashcardsTabPage() {
   return (
     <div className="space-y-6">
       {/* Action Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/40 border border-slate-800 p-4 rounded-2xl backdrop-blur">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/65 border border-indigo-500/25 p-5 rounded-3xl backdrop-blur-xl shadow-[0_0_30px_rgba(79,70,229,0.1)]">
         <div>
           <h2 className="text-base font-bold text-slate-100 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-indigo-400" />
+            <Sparkles className="w-4 h-4 text-cyan-300" />
             <span>Active Recall Flashcards ({kit.flashcards.length})</span>
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
@@ -64,17 +64,17 @@ export default function FlashcardsTabPage() {
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => setIsAddingNew(!isAddingNew)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-200 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 rounded-xl transition-all"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3.5 h-3.5 text-indigo-400" />
             <span>Add Flashcard</span>
           </button>
 
           <Link
             href={`/kits/${kitDoc._id}/practice`}
-            className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-md shadow-indigo-600/20 transition-all"
+            className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.35)] transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
-            <Target className="w-3.5 h-3.5" />
+            <Target className="w-3.5 h-3.5 text-cyan-300" />
             <span>Start Practice</span>
           </Link>
         </div>
@@ -135,7 +135,7 @@ export default function FlashcardsTabPage() {
           return (
             <div
               key={card.id}
-              className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 backdrop-blur flex flex-col justify-between space-y-4"
+              className="bg-slate-900/65 border border-indigo-500/20 hover:border-indigo-500/35 rounded-2xl p-5 backdrop-blur-xl transition-all shadow-sm hover:shadow-[0_0_25px_rgba(79,70,229,0.1)] flex flex-col justify-between space-y-4"
             >
               <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
                 <span className="font-mono text-xs font-bold text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">

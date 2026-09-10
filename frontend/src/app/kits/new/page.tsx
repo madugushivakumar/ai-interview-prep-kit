@@ -365,66 +365,72 @@ export default function NewKitPage() {
 
   return (
     <div className="max-w-3xl mx-auto py-6">
-      <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 sm:p-8 backdrop-blur shadow-2xl">
+      <div className="bg-slate-900/65 border border-indigo-500/25 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-[0_0_40px_rgba(79,70,229,0.15)] relative overflow-hidden">
+        {/* Subtle Ambient Glow */}
+        <div
+          className="absolute -top-16 -left-16 w-40 h-40 bg-purple-500/15 rounded-full blur-3xl pointer-events-none"
+          aria-hidden="true"
+        />
+
         {/* Header Title */}
-        <div className="mb-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 text-xs font-semibold mb-3">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Autonomous Intelligence Pipeline</span>
+        <div className="mb-6 relative z-10">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-950/60 border border-purple-500/30 text-purple-300 text-xs font-semibold mb-3">
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <span className="tracking-wide text-[11px] font-bold">Autonomous Intelligence Pipeline</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-100">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             Create Interview Preparation Kit
           </h1>
-          <p className="text-sm text-slate-400 mt-1.5 leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-400 mt-1.5 leading-relaxed">
             Generate customized day-by-day interview preparation kits backed by live company website research, requirement analysis, and active recall flashcards.
           </p>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-2 mb-8 p-1 bg-slate-950/80 border border-slate-800 rounded-2xl">
+        <div className="flex items-center gap-1.5 mb-7 p-1 bg-slate-950/80 border border-slate-800 rounded-2xl relative z-10">
           <button
             type="button"
             onClick={() => { setActiveTab('single'); setError(''); }}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
               activeTab === 'single'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
+                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-600/30'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <FileText className="w-4 h-4" />
+            <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>Single Role</span>
           </button>
 
           <button
             type="button"
             onClick={() => { setActiveTab('multi'); setError(''); }}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
               activeTab === 'multi'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
+                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-600/30'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Layers className="w-4 h-4" />
+            <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>Multi-Role Builder</span>
           </button>
 
           <button
             type="button"
             onClick={() => { setActiveTab('upload'); setError(''); }}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
               activeTab === 'upload'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
+                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-600/30'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <UploadCloud className="w-4 h-4" />
+            <UploadCloud className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>File Upload (JSON/CSV)</span>
           </button>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 rounded-xl bg-rose-950/40 border border-rose-500/30 flex items-start gap-3 text-rose-300 text-xs sm:text-sm">
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-rose-400" />
+          <div className="mb-6 p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/30 flex items-start gap-2.5 text-rose-300 text-xs sm:text-sm relative z-10 animate-in fade-in duration-200">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
             <span>{error}</span>
           </div>
         )}
@@ -507,20 +513,41 @@ export default function NewKitPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full sm:flex-1 flex items-center justify-center gap-2 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition-all hover:scale-[1.01] disabled:opacity-50"
+                className="w-full sm:flex-1 flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 hover:from-indigo-500 hover:via-purple-500 hover:to-cyan-500 text-white font-semibold text-sm rounded-xl shadow-[0_0_25px_rgba(99,102,241,0.4)] transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none"
               >
-                <Sparkles className="w-4 h-4" />
+                <Sparkles className="w-4 h-4 text-cyan-300" />
                 <span>{isSubmitting ? 'Starting Research Engine...' : 'Generate Interview Prep Kit'}</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleAddAnotherRoleFromSingle}
-                className="w-full sm:w-auto px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm rounded-xl border border-slate-700 transition-colors flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-4 py-3.5 bg-slate-900/80 hover:bg-slate-800 text-slate-200 font-semibold text-sm rounded-xl border border-slate-700/80 hover:border-slate-600 transition-all flex items-center justify-center gap-2"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 text-indigo-400" />
                 <span>Add Another Role</span>
               </button>
+            </div>
+
+            {/* Pipeline Feature Preview */}
+            <div className="mt-8 pt-6 border-t border-slate-800/80">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3 text-center sm:text-left">
+                Autonomous Intelligence Pipeline
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {[
+                  { title: 'Live Web Crawl', desc: 'Sitemaps & culture docs', icon: '🌐' },
+                  { title: 'Requirement Parsing', desc: 'Must-haves vs nice-to-haves', icon: '🎯' },
+                  { title: 'Targeted Questions', desc: '100% verified coverage', icon: '⚡' },
+                  { title: 'Spaced Schedule', desc: 'Day-by-day recall', icon: '📅' }
+                ].map((step, idx) => (
+                  <div key={idx} className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 hover:border-indigo-500/30 transition-all">
+                    <div className="text-base mb-1">{step.icon}</div>
+                    <div className="text-xs font-semibold text-slate-200">{step.title}</div>
+                    <div className="text-[11px] text-slate-400 leading-tight mt-0.5">{step.desc}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </form>
         )}
@@ -619,9 +646,9 @@ export default function NewKitPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition-all hover:scale-[1.01] disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 hover:from-indigo-500 hover:via-purple-500 hover:to-cyan-500 text-white font-semibold text-sm rounded-xl shadow-[0_0_25px_rgba(99,102,241,0.4)] transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none"
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 text-cyan-300" />
               <span>{isSubmitting ? 'Starting Batch Generation...' : `Generate All (${roles.length}) Kits`}</span>
             </button>
           </form>
@@ -739,9 +766,9 @@ export default function NewKitPage() {
                   type="button"
                   onClick={handleFileBatchSubmit}
                   disabled={isSubmitting || filePreview.roles.length === 0}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition-all hover:scale-[1.01] disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 hover:from-indigo-500 hover:via-purple-500 hover:to-cyan-500 text-white font-semibold text-sm rounded-xl shadow-[0_0_25px_rgba(99,102,241,0.4)] transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none"
                 >
-                  <Sparkles className="w-4 h-4" />
+                  <Sparkles className="w-4 h-4 text-cyan-300" />
                   <span>
                     {isSubmitting
                       ? 'Launching Batch...'

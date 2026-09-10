@@ -28,7 +28,11 @@ export function BatchGenerationProgress({ items, onReset }: BatchGenerationProgr
   const isAllFinished = inProgress === 0;
 
   return (
-    <div className="w-full max-w-3xl mx-auto bg-slate-900/70 border border-slate-800 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
+    <div className="w-full max-w-3xl mx-auto bg-slate-900/70 border border-indigo-500/25 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-[0_0_50px_rgba(79,70,229,0.15)] relative overflow-hidden">
+      <div
+        className="absolute -top-24 -right-24 w-56 h-56 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"
+        aria-hidden="true"
+      />
       {/* Header Banner */}
       <div className="mb-6 pb-6 border-b border-slate-800">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

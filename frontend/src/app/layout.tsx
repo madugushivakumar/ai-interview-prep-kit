@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '../context/AuthContext';
-import { Navbar } from '../components/layout/Navbar';
+import { AppShell } from '../components/layout/AppShell';
 
 export const metadata: Metadata = {
   title: 'AI Interview Prep Kit | Research, Targeted Questions & Flashcards',
@@ -15,12 +15,48 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                function isDevToolsMetricsError(msg, filename, stack) {
+                  var m = (msg || '').toString();
+                  var f = (filename || '').toString();
+                  var s = (stack || '').toString();
+                  return (
+                    m.indexOf("Cannot read properties of undefined (reading 'startTime')") !== -1 ||
+                    (m.indexOf('startTime') !== -1 && (f.indexOf('VM') !== -1 || !f || s.indexOf('reportAllChanges') !== -1))
+                  );
+                }
+
+                window.addEventListener('error', function(e) {
+                  if (e && isDevToolsMetricsError(e.message, e.filename, e.error && e.error.stack)) {
+                    e.preventDefault();
+                    if (typeof e.stopImmediatePropagation === 'function') {
+                      e.stopImmediatePropagation();
+                    }
+                    return true;
+                  }
+                }, true);
+
+                var origError = console.error;
+                console.error = function() {
+                  var firstArg = arguments[0];
+                  var firstArgStr = typeof firstArg === 'string' ? firstArg : (firstArg && firstArg.message ? firstArg.message : '');
+                  if (isDevToolsMetricsError(firstArgStr, '', (arguments[1] && arguments[1].stack) || (firstArg && firstArg.stack))) {
+                    return;
+                  }
+                  return origError.apply(console, arguments);
+                };
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500/30 selection:text-indigo-200">
         <AuthProvider>
-          <Navbar />
-          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {children}
-          </main>
+          <AppShell>{children}</AppShell>
         </AuthProvider>
       </body>
     </html>

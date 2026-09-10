@@ -10,7 +10,7 @@ export default function RoleTabPage() {
 
   return (
     <div className="space-y-6">
-      <RoleBreakdownCard role={kit.role} />
+      <RoleBreakdownCard role={kit.role} source={kit.source} />
     </div>
   );
 }

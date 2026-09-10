@@ -29,7 +29,8 @@ router.get('/:id', KitController.getKitById);
 router.delete('/:id', KitController.deleteKit);
 router.get('/:id/generation-status', KitController.getGenerationStatus);
 
-// Inline mutations
+// Inline mutations & Company intelligence
+router.get('/:id/company', KitController.getCompanyBrief);
 router.patch('/:id/company', validateBody(UpdateCompanyBriefSchema), KitController.updateCompany);
 router.patch('/:id/role', validateBody(UpdateRoleSchema), KitController.updateRole);
 

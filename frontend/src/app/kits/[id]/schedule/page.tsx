@@ -27,7 +27,7 @@ export default function ScheduleTabPage() {
   return (
     <div className="space-y-6">
       {/* Schedule Summary Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/40 border border-slate-800 p-5 rounded-2xl backdrop-blur">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/65 border border-indigo-500/25 p-5 sm:p-6 rounded-3xl backdrop-blur-xl shadow-[0_0_30px_rgba(79,70,229,0.1)]">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
             <Clock className="w-5 h-5" />

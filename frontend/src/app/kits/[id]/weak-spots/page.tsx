@@ -50,14 +50,14 @@ export default function WeakSpotsTabPage() {
   return (
     <div className="space-y-6">
       {/* Feature Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/40 border border-slate-800 p-5 rounded-2xl backdrop-blur">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/65 border border-indigo-500/25 p-5 sm:p-6 rounded-3xl backdrop-blur-xl shadow-[0_0_30px_rgba(79,70,229,0.1)]">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-cyan-400 bg-cyan-950/50 border border-cyan-500/30 px-2 py-0.5 rounded-full">
-              Creative Assessment Feature
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-cyan-300 bg-cyan-950/60 border border-cyan-500/40 px-2.5 py-0.5 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+              Autonomous Remediation Intelligence
             </span>
           </div>
-          <h2 className="text-xl font-bold text-slate-100 mt-1">
+          <h2 className="text-xl font-bold text-slate-100 mt-1.5">
             Weak Spots & Targeted Revision Report
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
@@ -68,19 +68,19 @@ export default function WeakSpotsTabPage() {
         <div className="flex items-center gap-2.5">
           <button
             onClick={fetchReport}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-400 hover:text-slate-200 bg-slate-800 rounded-xl"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 rounded-xl transition-all"
             title="Refresh Analytics"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
+            <RefreshCw className="w-3.5 h-3.5 text-indigo-400" />
             <span>Refresh</span>
           </button>
 
           <Link
             href={`/kits/${kitDoc?._id}/practice`}
-            className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-md transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.35)] transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
-            <Target className="w-3.5 h-3.5" />
-            <span>Practice Flashcards</span>
+            <Target className="w-3.5 h-3.5 text-cyan-300" />
+            <span>Practice Drills</span>
           </Link>
         </div>
       </div>

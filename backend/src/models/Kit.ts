@@ -13,9 +13,36 @@ export interface IPracticeCard {
   practiceCount: number;
 }
 
+export interface IPracticeAttempt {
+  attemptId: string;
+  itemId: string; // questionId or flashcardId
+  itemType: 'question' | 'flashcard';
+  category?: string;
+  confidence: number; // 1 to 5
+  answerText?: string;
+  notes?: string;
+  practicedAt: Date;
+}
+
+export interface IItemProgress {
+  itemId: string;
+  itemType: 'question' | 'flashcard';
+  category?: string;
+  lastRating: number;
+  practiceCount: number;
+  isMastered: boolean;
+  lastPracticedAt: Date;
+  notes?: string;
+  userAnswer?: string;
+  isStarred?: boolean;
+}
+
 export interface IPracticeState {
   cards: IPracticeCard[];
+  attempts?: IPracticeAttempt[];
+  itemProgress?: Record<string, IItemProgress>;
   totalSessions: number;
+  lastPracticedAt?: Date;
 }
 
 export interface IKitDocument extends Document {
@@ -109,7 +136,10 @@ const KitSchemaModel = new Schema<IKitDocument>(
     },
     practiceState: {
       cards: [PracticeCardSchema],
-      totalSessions: { type: Number, default: 0 }
+      attempts: { type: Array, default: [] },
+      itemProgress: { type: Schema.Types.Mixed, default: {} },
+      totalSessions: { type: Number, default: 0 },
+      lastPracticedAt: { type: Date }
     }
   },
   {

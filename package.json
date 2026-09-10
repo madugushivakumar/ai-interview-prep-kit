@@ -9,7 +9,9 @@
     "typecheck": "npm run --prefix backend typecheck && npm run --prefix frontend typecheck",
     "build": "npm run --prefix backend build && npm run --prefix frontend build",
     "dev:backend": "npm run --prefix backend dev",
-    "dev:frontend": "npm run --prefix frontend dev"
+    "dev:frontend": "npm run --prefix frontend dev",
+    "free:ports": "node scripts/free-ports.js",
+    "clean:ports": "node scripts/free-ports.js"
   },
   "keywords": [
     "ai",

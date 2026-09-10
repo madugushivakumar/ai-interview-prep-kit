@@ -1,6 +1,21 @@
 export type RequirementKind = 'technical' | 'behavioural' | 'domain';
 export type RequirementPriority = 'must' | 'nice';
 export type QuestionCategory = 'technical' | 'behavioural' | 'system-design' | 'company-fit';
+export type PracticeMode =
+  | 'all'
+  | 'quick'
+  | 'technical'
+  | 'behavioural'
+  | 'system-design'
+  | 'company-fit'
+  | 'must-have'
+  | 'must'
+  | 'weak-areas'
+  | 'weak'
+  | 'unpracticed'
+  | 'starred'
+  | 'pinned'
+  | 'flashcards';
 
 export interface ItemMetadata {
   source: 'generated' | 'user';
@@ -19,10 +34,91 @@ export interface SourceInfo {
   pages_used: string[];
 }
 
+export interface DetailedSource {
+  id?: string;
+  title: string;
+  url: string;
+  source_type: 'official' | 'community' | 'public' | 'unknown';
+  retrieved_at?: string;
+  relevance?: string;
+}
+
+export interface CompanyProductService {
+  name: string;
+  description: string;
+  source?: string;
+}
+
+export interface CompanyValue {
+  value: string;
+  description: string;
+  source?: string;
+}
+
+export interface EngineeringContext {
+  themes?: string[];
+  challenges?: string[];
+  tech_areas?: string[];
+  blog_urls?: string[];
+  source?: string;
+}
+
+export interface HiringProcessContext {
+  official_stages?: string[];
+  public_discussions?: string[];
+  interview_themes?: string[];
+  evaluation_focus?: string[];
+  sources?: string[];
+}
+
+export interface PreparationInsight {
+  priority: number;
+  category: string;
+  title: string;
+  recommendation: string;
+  source_type: 'jd_grounded' | 'company_research' | 'public_interview';
+}
+
+export interface RoleCompanyContext {
+  relevant_engineering_areas?: string[];
+  why_they_matter?: string;
+  distinction_notes?: string;
+}
+
 export interface CompanyBrief {
   summary: string;
   what_they_do: string;
   sources: string[];
+  research_status?: 'verified' | 'partially_researched' | 'unavailable';
+  researched_at?: string;
+  industry?: string;
+  primary_domains?: string[];
+  engineering_domains?: string[];
+  business_model?: string;
+  company_scale?: string;
+  products_services?: CompanyProductService[];
+  mission?: string;
+  values?: CompanyValue[];
+  engineering_context?: EngineeringContext;
+  role_company_context?: RoleCompanyContext;
+  engineering_challenges?: Array<{ challenge: string; details: string; source?: string }>;
+  hiring_process?: HiringProcessContext;
+  public_interview_research?: {
+    candidate_experience_summary?: string;
+    recurring_technical_areas?: string[];
+    reported_question_themes?: string[];
+    reported_behavioral_topics?: string[];
+    sources?: string[];
+  };
+  what_to_prepare?: PreparationInsight[];
+  detailed_sources?: DetailedSource[];
+  company_questions?: Array<{
+    question: string;
+    connection_to_company: string;
+    connection_to_role: string;
+    sample_angle?: string;
+  }>;
+  [key: string]: any;
 }
 
 export interface Requirement {
@@ -38,6 +134,24 @@ export interface RoleBreakdown {
   seniority: string;
   responsibilities: string[];
   requirements: Requirement[];
+  overview?: string;
+  normalized_title?: string;
+  employment_type?: string;
+  work_mode?: string;
+  location?: string;
+  department?: string;
+  job_family?: string;
+  experience?: string;
+  education?: string[];
+  certifications?: string[];
+  technical_skills?: Record<string, string[]>;
+  soft_skills?: string[];
+  domain_skills?: string[];
+  responsibility_skill_map?: Record<string, string[]>;
+  requirement_skill_map?: Record<string, string[]>;
+  compensation?: string;
+  benefits?: string[];
+  work_authorization?: string;
 }
 
 export interface Question {
@@ -104,6 +218,80 @@ export interface GenerationState {
   };
 }
 
+export interface PracticeCard {
+  flashcardId: string;
+  confidenceHistory: Array<{
+    rating: number;
+    practicedAt: string;
+  }>;
+  lastRating?: number;
+  lastPracticedAt?: string;
+  practiceCount: number;
+}
+
+export interface PracticeAttempt {
+  attemptId: string;
+  itemId: string;
+  itemType: 'question' | 'flashcard';
+  category?: string;
+  confidence: number;
+  answerText?: string;
+  notes?: string;
+  practicedAt: string;
+}
+
+export interface ItemProgress {
+  itemId: string;
+  itemType: 'question' | 'flashcard';
+  category?: string;
+  lastRating: number;
+  practiceCount: number;
+  isMastered: boolean;
+  lastPracticedAt: string;
+  notes?: string;
+  userAnswer?: string;
+  isStarred?: boolean;
+}
+
+export interface PracticeState {
+  cards: PracticeCard[];
+  attempts?: PracticeAttempt[];
+  itemProgress?: Record<string, ItemProgress>;
+  totalSessions: number;
+  lastPracticedAt?: string;
+}
+
+export interface PracticeProgressStats {
+  totalQuestions: number;
+  totalFlashcards: number;
+  questionsPracticed: number;
+  questionsMastered: number;
+  questionsWeak: number;
+  averageConfidence: number;
+  mustHavePracticed: number;
+  mustHaveTotal: number;
+  mustHaveCoveragePercent: number;
+  overallProgressPercent: number;
+  categoryStats: Record<string, {
+    total: number;
+    practiced: number;
+    mastered: number;
+    weak: number;
+    averageRating: number;
+    progressPercent: number;
+  }>;
+  recentAttempts: Array<{
+    attemptId: string;
+    itemId: string;
+    itemType: string;
+    category?: string;
+    prompt?: string;
+    confidence: number;
+    practicedAt: string;
+    notes?: string;
+  }>;
+}
+
 export interface KitDocument {
   _id: string;
   userId: string;
@@ -115,6 +303,7 @@ export interface KitDocument {
   };
   kit: Kit;
   generationState: GenerationState;
+  practiceState?: PracticeState;
   createdAt: string;
   updatedAt: string;
 }

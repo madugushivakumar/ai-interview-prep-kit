@@ -49,7 +49,11 @@ export function GenerationProgress({ generationState, onRetry }: GenerationProgr
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-slate-900/60 border border-slate-800 rounded-3xl p-8 backdrop-blur-xl shadow-2xl">
+    <div className="w-full max-w-2xl mx-auto bg-slate-900/70 border border-indigo-500/25 rounded-3xl p-8 backdrop-blur-xl shadow-[0_0_50px_rgba(79,70,229,0.15)] relative overflow-hidden">
+      <div
+        className="absolute -top-20 -right-20 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"
+        aria-hidden="true"
+      />
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-semibold tracking-wide uppercase text-indigo-400">

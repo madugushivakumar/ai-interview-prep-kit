@@ -83,15 +83,15 @@ export default function QuestionsTabPage() {
   return (
     <div className="space-y-8">
       {/* Top Filter and Add Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/40 border border-slate-800 p-4 rounded-2xl backdrop-blur">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/65 border border-indigo-500/25 p-4 rounded-2xl backdrop-blur-xl shadow-[0_0_30px_rgba(79,70,229,0.1)]">
         {/* Filter buttons */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setSelectedCategoryFilter('all')}
             className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all ${
               selectedCategoryFilter === 'all'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-[0_0_15px_rgba(99,102,241,0.35)]'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
             }`}
           >
             All Questions ({kit.questions.length})
@@ -104,8 +104,8 @@ export default function QuestionsTabPage() {
                 onClick={() => setSelectedCategoryFilter(cat.key)}
                 className={`px-3 py-1.5 text-xs font-semibold rounded-xl whitespace-nowrap transition-all ${
                   selectedCategoryFilter === cat.key
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-[0_0_15px_rgba(99,102,241,0.35)]'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
                 }`}
               >
                 {cat.label.split(' ')[0]} ({count})
@@ -117,7 +117,7 @@ export default function QuestionsTabPage() {
         {/* Add Question Button */}
         <button
           onClick={() => setIsAddingNew(!isAddingNew)}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-sm transition-colors self-start sm:self-auto"
+          className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.3)] transition-all self-start sm:self-auto hover:scale-[1.02] active:scale-[0.98]"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Add Custom Question</span>
@@ -242,7 +242,7 @@ export default function QuestionsTabPage() {
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${isCategoryRegenerating ? 'animate-spin' : ''}`} />
                   <span>
-                    {isCategoryRegenerating ? 'Regenerating...' : `Regenerate ${catGroup.label.split(' ')[0]}`}
+                    {isCategoryRegenerating ? 'Regenerating...' : `Regenerate ${catGroup.key === 'company-fit' ? 'Company Fit' : catGroup.key === 'system-design' ? 'System Design' : catGroup.label.split(' ')[0]}`}
                   </span>
                 </button>
               </div>

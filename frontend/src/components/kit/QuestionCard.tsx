@@ -54,10 +54,10 @@ export function QuestionCard({ question, onUpdate, onDelete, onMoveCategory }: Q
 
   return (
     <div
-      className={`relative rounded-2xl border p-5 transition-all ${
+      className={`relative rounded-2xl border p-5 transition-all backdrop-blur-md ${
         isPinned
-          ? 'bg-slate-900/80 border-indigo-500/40 shadow-lg shadow-indigo-950/30 ring-1 ring-indigo-500/20'
-          : 'bg-slate-900/40 border-slate-800/80 hover:border-slate-700'
+          ? 'bg-slate-900/80 border-indigo-500/50 shadow-[0_0_25px_rgba(99,102,241,0.25)] ring-1 ring-indigo-500/30'
+          : 'bg-slate-900/60 border-slate-800/80 hover:border-indigo-500/30 hover:bg-slate-900/75 hover:shadow-[0_0_20px_rgba(79,70,229,0.08)]'
       }`}
     >
       {/* Header Bar */}

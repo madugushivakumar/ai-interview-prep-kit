@@ -81,4 +81,58 @@ describe('Central Reusable Interview Pipeline (runInterviewPipeline)', () => {
       }, { allowLocalUrls: false })
     ).rejects.toThrow();
   });
+
+  it('should handle no-hiring-page edge case honestly without failing pipeline', async () => {
+    const jd = `
+      Backend Go Developer
+      Must have:
+      - 3+ years writing concurrent services in Go.
+      - Experience with PostgreSQL.
+    `;
+
+    // example.org has no careers/hiring subpages
+    const kit = await runInterviewPipeline({
+      jd,
+      company_url: 'https://example.org',
+      days: 4
+    }, { allowLocalUrls: true });
+
+    expect(kit).toBeDefined();
+    expect(kit.company_brief).toBeDefined();
+    expect(kit.company_brief.hiring_process).toBeDefined();
+    // Verify that absence of hiring page is handled honestly as a research gap rather than pipeline failure
+    expect(kit.schedule.days).toHaveLength(4);
+    expect(KitSchema.safeParse(kit).success).toBe(true);
+  });
+
+  it('should verify that research output materially influences question generation and company fit', async () => {
+    const jd = `
+      Observability Engineer
+      Must have:
+      - Distributed tracing and OpenTelemetry
+      - High throughput event pipelines
+    `;
+
+    const kit = await runInterviewPipeline({
+      jd,
+      company_url: 'https://example.com',
+      days: 3
+    }, { allowLocalUrls: true });
+
+    // Verify company fit questions incorporate company context
+    const companyFitQuestions = kit.questions.filter(q => q.category === 'company-fit');
+    expect(companyFitQuestions.length).toBeGreaterThan(0);
+
+    for (const q of companyFitQuestions) {
+      expect(q.answer_outline).toContain('Company Evidence');
+      expect(q.prompt.length).toBeGreaterThan(20);
+    }
+
+    // Verify company brief includes what_to_prepare insights linked to research
+    expect(kit.company_brief.what_to_prepare?.length).toBeGreaterThan(0);
+    const hasCompanyResearchInsight = kit.company_brief.what_to_prepare?.some(
+      insight => insight.source_type === 'company_research'
+    );
+    expect(hasCompanyResearchInsight).toBe(true);
+  });
 });

@@ -4,12 +4,13 @@ import React from 'react';
 import { useKit } from '../KitContext';
 import { CompanyBriefCard } from '../../../../components/kit/CompanyBriefCard';
 import { api } from '../../../../lib/apiClient';
+import { CompanyBrief } from '../../../../types';
 
 export default function CompanyTabPage() {
   const { kit, kitDoc, refreshKit } = useKit();
   if (!kit || !kitDoc) return null;
 
-  const handleUpdate = async (updated: { summary: string; what_they_do: string }) => {
+  const handleUpdate = async (updated: Partial<CompanyBrief>) => {
     await api.patch(`/kits/${kitDoc._id}/company`, updated);
     await refreshKit();
   };
@@ -24,6 +25,9 @@ export default function CompanyTabPage() {
       <CompanyBriefCard
         brief={kit.company_brief}
         companyName={kit.source.company || 'Company'}
+        companyUrl={kit.source.company_url || kitDoc.input.company_url}
+        role={kit.role}
+        kitId={kitDoc._id}
         onUpdate={handleUpdate}
         onRegenerate={handleRegenerate}
       />

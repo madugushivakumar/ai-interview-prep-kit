@@ -17,7 +17,7 @@ export function ScheduleDayCard({ day, allQuestions }: ScheduleDayCardProps) {
     .filter((q): q is Question => q !== undefined);
 
   return (
-    <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 backdrop-blur">
+    <div className="bg-slate-900/65 border border-indigo-500/20 hover:border-indigo-500/35 rounded-2xl p-5 backdrop-blur-xl shadow-sm hover:shadow-[0_0_20px_rgba(79,70,229,0.1)] transition-all">
       <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-800/80">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-indigo-600/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-xs">
